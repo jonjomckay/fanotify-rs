@@ -142,7 +142,7 @@ impl Fanotify {
     pub fn new_with_nonblocking(mode: FanotifyMode) -> Self {
         Fanotify {
             fd: fanotify_init(
-                FAN_CLOEXEC | FAN_NONBLOCK | mode.to_fan_class(),
+                FAN_CLOEXEC | FAN_NONBLOCK | FAN_REPORT_DIR_FID | FAN_REPORT_NAME | mode.to_fan_class(),
                 O_CLOEXEC | O_RDONLY,
             )
             .unwrap(),
