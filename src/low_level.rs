@@ -6,6 +6,9 @@ use std::io::Error;
 use std::mem;
 use std::os::unix::ffi::OsStrExt;
 use std::slice;
+use std::ffi::CString;
+use std::os::raw::c_char;
+
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct fanotify_event_metadata {
@@ -349,18 +352,16 @@ pub fn fanotify_mark<P: ?Sized + FanotifyPath>(
     dirfd: i32,
     path: &P,
 ) -> Result<(), Error> {
+    let c_str = CString::new(path.as_os_str().to_str().unwrap()).unwrap();
+    let c_path: *const c_char = c_str.as_ptr() as *const c_char;
+
     unsafe {
         match libc::fanotify_mark(
             fanotify_fd,
             flags,
             mask,
             dirfd,
-            path.as_os_str()
-                .as_bytes()
-                .iter()
-                .map(|p| *p as i8)
-                .collect::<Vec<i8>>()
-                .as_ptr(),
+            c_path,
         ) {
             0 => {
                 return Ok(());
